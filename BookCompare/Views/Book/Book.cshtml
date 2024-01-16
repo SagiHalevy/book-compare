@@ -1,0 +1,95 @@
+﻿@model IEnumerable<BookCompare.ViewModels.BookViewModel>
+@{
+    ViewBag.Title = "Books";
+}
+
+@Html.Partial("_BookSearchForm")
+
+
+
+@if(Model.Count() <= 0)
+    {
+        <div>לא נמצאו תוצאות עבור "@ViewBag.SearchInput".</div>
+    }
+else { 
+        <div> @Model.Count() תוצאות עבור "@ViewBag.SearchInput":</div>
+    }
+
+<div class="container mt-5">
+    @foreach (var book in Model)
+    {
+        <div class="card">
+            <div class="row no-gutters align-items-center flex-column flex-md-row">
+                <div class="col d-flex align-items-center justify-content-center mt-2 mt-md-0">
+                    <img src="@Url.Content(book.ImageUrl)" alt="Book Image" class="book-image">
+                </div>
+
+                <div class="col text-center">
+                    <div class="card-body">
+                        <h2 class="card-title">@book.Title</h2>
+                        <p class="card-text">מחיר: @(book.Price != null ? book.Price.Value.ToString("N2") : "Price not found")</p>
+                        <p class="card-text">מקור: @book.Origin</p>
+                    </div>
+                </div>
+
+                <div class="col text-center">
+                    <div class="row flex-column">
+                        <div class="col">
+                            <img src="@Url.Content(book.OriginImageUrl)" alt="Origin Image" class="origin-image">
+                        </div>
+                        <div class="col">
+                            @if (!string.IsNullOrEmpty(book.BuyUrl))
+                            {
+                                <a href="@book.BuyUrl" class="btn btn-primary mb-2 mb-md-0" target="_blank">פתח ב-@book.Origin</a>
+                            }
+                            else
+                            {
+                                <span class="text-danger">קישור לקנייה לא זמין</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<style>
+    .card {
+        border: none;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #f5f5f5;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .card-text {
+        font-size: 1rem;
+        color: #777;
+    }
+
+    .btn-primary {
+        background-color: #ff6b6b;
+        border: none;
+        color: #fff;
+    }
+
+        .btn-primary:hover {
+            background-color: #ff3333;
+        }
+
+    .book-image, .origin-image {
+        max-height: 120px;
+        width: auto;
+        max-width: 120px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .book-image:hover {
+            transform: scale(1.3);
+        }
+</style>

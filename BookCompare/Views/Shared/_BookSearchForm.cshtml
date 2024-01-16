@@ -1,0 +1,39 @@
+﻿<div class="container d-flex flex-column align-items-center">
+    <form action="/Book/Search" method="get" id="search-book-form">
+        <div class="input-group mt-3">
+            <input type="text" class="form-control" placeholder="הכנס שם ספר" name="bookName" id="book">
+            <button class="btn btn-outline-secondary" type="submit" id="search-button">חפש</button>
+        </div>
+    </form>
+
+    <div class="loader mt-2"></div>
+    <div id="search-message" style="display: none;">מחפש... אנא המתן.</div>
+
+</div>
+
+<script>
+    document.querySelector("#search-book-form").addEventListener("submit", function () {
+        // Disable the search button and show loading spinner or message
+        document.querySelector("#search-button").setAttribute("disabled", "disabled");
+        document.getElementsByClassName("loader")[0].style.display = "block";
+        // You can also display the search message if you prefer
+        document.getElementById("search-message").style.display = "block";
+    });
+</script>
+
+<style>
+    .loader {
+          display:none;
+          border: 8px solid #f3f3f3; /* Light grey */
+          border-top: 8px solid #3498db; /* Blue */
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+</style>
