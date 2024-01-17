@@ -214,13 +214,20 @@
     <Compile Include="Controllers\BookController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\WishlistController.cs" />
     <Compile Include="DataAccess\RedisConnectionFactory.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202401171920203_CreateWishlist.cs" />
+    <Compile Include="Migrations\202401171920203_CreateWishlist.designer.cs">
+      <DependentUpon>202401171920203_CreateWishlist.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\WishlistItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScrapersNew\DaniSfarim.cs" />
     <Compile Include="ScrapersNew\Kidsbest.cs" />
@@ -319,6 +326,7 @@
     <Content Include="Views\Book\Index.cshtml" />
     <Content Include="Views\Book\Book.cshtml" />
     <Content Include="Views\Shared\_BookSearchForm.cshtml" />
+    <Content Include="Views\Wishlist\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -349,6 +357,11 @@
     <Content Include="Scripts\bootstrap.bundle.js.map" />
     <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.4.1.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202401171920203_CreateWishlist.resx">
+      <DependentUpon>202401171920203_CreateWishlist.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
