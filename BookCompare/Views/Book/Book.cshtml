@@ -49,7 +49,11 @@ else
                             }
                         </div>
                         <div class="col">
-                            <button class="btn btn-success add-to-wishlist" data-book-info='@Html.Raw(Json.Encode(book))'>Add to Wishlist</button>
+                            <button class="btn btn-success add-to-wishlist" 
+                                    data-book-info='@Html.Raw(Json.Encode(book))' 
+                                    data-is-in-wishlist='@book.IsInWishlist.ToString().ToLower()'>
+                                @(book.IsInWishlist ? "Remove From Wishlist" : "Add to Wishlist")
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -104,22 +108,26 @@ else
     <script>
         $(document).ready(function () {
             $(".add-to-wishlist").click(function () {
-               
-                var bookData = $(this).data("book-info");
+                var button = $(this); // Store a reference to the button
+                var isCurrentlyInWishlist = button.data("is-in-wishlist");
+                var ajaxUrl = isCurrentlyInWishlist ? "/Book/RemoveFromWishlist" : "/Book/AddToWishlist";
+                var bookData = button.data("book-info");
+
                 $.ajax({
                     type: "POST",
-                    url: "/Book/AddToWishlist",
+                    url: ajaxUrl,
                     contentType: "application/json",
                     data: JSON.stringify(bookData),
+                    traditional: true,
                     success: function () {
-                        $(this).text("Added to Wishlist");
+                        button.data("is-in-wishlist", !isCurrentlyInWishlist);
+                        button.text(isCurrentlyInWishlist ? "Add to Wishlist" : "Remove from Wishlist");
                     },
                     error: function () {
                         alert("Error adding to wishlist.");
                     }
-                })
-
-            })
-        })
+                });
+            });
+        });
     </script>
 }

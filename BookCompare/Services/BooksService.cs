@@ -1,4 +1,5 @@
 ﻿using BookCompare.DataAccess;
+using BookCompare.Models;
 using BookCompare.ScrapersNew;
 using BookCompare.ViewModels;
 using Newtonsoft.Json;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,6 +17,13 @@ namespace BookCompare.Services
 {
     public class BooksService
     {
+        private ApplicationDbContext _context;
+
+        public BooksService()
+        {
+            _context = new ApplicationDbContext();
+        }
+
         static List<Scraper> origins = new List<Scraper>
         {
             new Steimatzky(),
@@ -29,7 +38,7 @@ namespace BookCompare.Services
 
 
 
-        public async Task<List<BookViewModel>> GetAllBooks(string bookName)
+        public async Task<List<BookViewModel>> GetAllBooks(string bookName, string userId)
         {
 
             //running all scraping simultaneously
@@ -51,11 +60,19 @@ namespace BookCompare.Services
             var bookDataResults = await Task.WhenAll(scrapeTasks);
 
             var bookViewModels = bookDataResults.Where(bookData => bookData != null).ToList();
-            var sortedBookViewModels = bookViewModels.OrderBy(book => book.Price ?? double.MaxValue).ToList();
 
-            return sortedBookViewModels;
+            bookViewModels = bookViewModels.OrderBy(book => book.Price ?? double.MaxValue).ToList();
+
+            foreach(var bookViewModel in bookViewModels)
+            {
+                if (GetBookIfExistInWishlist(bookViewModel, userId) != null)
+                {
+                    bookViewModel.IsInWishlist = true;
+                }
+            }
+
+            return bookViewModels;
         }
-
 
 
 
@@ -107,5 +124,74 @@ namespace BookCompare.Services
         }
 
 
+        public WishlistItem AddToWishlist(string userId, BookViewModel bookViewModel)
+        {
+            var bookInDb = GetBookIfExistInWishlist(bookViewModel, userId);
+            if (bookInDb != null)
+            {
+                return null;
+            }
+
+            string uniqueString = $"{bookViewModel.Origin}{bookViewModel.Title}{bookViewModel.BuyUrl}";
+            var hashedId = ComputeFNVHash(uniqueString);
+            WishlistItem wishlistItem = new WishlistItem
+            {
+                HashedId = hashedId,
+                UserId = userId,
+                DateAdded = DateTime.Now,
+                Origin = bookViewModel.Origin,
+                Title = bookViewModel.Title,
+                ImageUrl = bookViewModel.ImageUrl,
+                Price = bookViewModel.Price,
+                BuyUrl = bookViewModel.BuyUrl,
+                OriginImageUrl = bookViewModel.OriginImageUrl,
+            };
+            _context.WishlistItems.Add(wishlistItem);
+            _context.SaveChanges();
+            return wishlistItem;
+        }
+
+
+        public WishlistItem RemoveFromWishlist(string userId, BookViewModel bookViewModel)
+        {
+            var bookInDb = GetBookIfExistInWishlist(bookViewModel, userId);
+            if (bookInDb == null)
+            {
+                return null;
+            }
+            _context.WishlistItems.Remove(bookInDb);
+            _context.SaveChanges();
+            return bookInDb;
+        }
+
+
+
+
+        private WishlistItem GetBookIfExistInWishlist(BookViewModel bookViewModel, string userId)
+        {
+            string uniqueString = $"{bookViewModel.Origin}{bookViewModel.Title}{bookViewModel.BuyUrl}";
+            var hashedId = ComputeFNVHash(uniqueString);
+            var wishlistItem = _context.WishlistItems.Where(i => i.UserId == userId && i.HashedId == hashedId).FirstOrDefault();
+
+            if (wishlistItem == null) return null;
+            return wishlistItem;
+           
+        }
+
+        private string ComputeFNVHash(string input)
+        {
+            const uint fnvPrime = 16777619; // FNV prime number
+            const uint fnvOffsetBasis = 2166136261; // FNV offset basis
+
+            uint hash = fnvOffsetBasis;
+
+            foreach (byte b in Encoding.UTF8.GetBytes(input))
+            {
+                hash ^= b;
+                hash *= fnvPrime;
+            }
+
+            return hash.ToString("X8"); // Convert to hexadecimal representation
+        }
     }
 }
