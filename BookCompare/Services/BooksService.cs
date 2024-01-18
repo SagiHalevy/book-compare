@@ -1,4 +1,5 @@
-﻿using BookCompare.DataAccess;
+﻿using BookCompare.CookiesModel;
+using BookCompare.DataAccess;
 using BookCompare.Models;
 using BookCompare.ScrapersNew;
 using BookCompare.ViewModels;
@@ -38,7 +39,7 @@ namespace BookCompare.Services
 
 
 
-        public async Task<List<BookViewModel>> GetAllBooks(string bookName, string userId)
+        public async Task<List<BookViewModel>> GetAllBooks(string bookName, string userId, HttpRequestBase request)
         {
 
             //running all scraping simultaneously
@@ -63,14 +64,32 @@ namespace BookCompare.Services
 
             bookViewModels = bookViewModels.OrderBy(book => book.Price ?? double.MaxValue).ToList();
 
-            foreach(var bookViewModel in bookViewModels)
+            if(userId != null) //user is authenticated
             {
-                if (GetBookIfExistInWishlist(bookViewModel, userId) != null)
+                foreach (var bookViewModel in bookViewModels)
                 {
-                    bookViewModel.IsInWishlist = true;
+                    if (GetBookIfExistInWishlist(bookViewModel, userId) != null)
+                    {
+                        bookViewModel.IsInWishlist = true;
+                    }
                 }
             }
-
+            else //user is not authenticated
+            {
+                var wishlistCookie = request.Cookies["Wishlist"];
+                if (wishlistCookie != null && !string.IsNullOrEmpty(wishlistCookie.Value)) 
+                {
+                    var wishlistJson = HttpUtility.UrlDecode(wishlistCookie.Value);
+                    var wishlistItemCookieList = JsonConvert.DeserializeObject<List<WishlistItemCookie>>(wishlistJson);
+                    foreach (var bookViewModel in bookViewModels)
+                    {
+                        if (GetBookIfExistInCookieWishlist(bookViewModel, wishlistItemCookieList) != null)
+                        {
+                            bookViewModel.IsInWishlist = true;
+                        }
+                    }
+                }
+            }
             return bookViewModels;
         }
 
@@ -124,6 +143,9 @@ namespace BookCompare.Services
         }
 
 
+
+
+
         public WishlistItem AddToWishlist(string userId, BookViewModel bookViewModel)
         {
             var bookInDb = GetBookIfExistInWishlist(bookViewModel, userId);
@@ -165,8 +187,6 @@ namespace BookCompare.Services
         }
 
 
-
-
         private WishlistItem GetBookIfExistInWishlist(BookViewModel bookViewModel, string userId)
         {
             string uniqueString = $"{bookViewModel.Origin}{bookViewModel.Title}{bookViewModel.BuyUrl}";
@@ -177,6 +197,97 @@ namespace BookCompare.Services
             return wishlistItem;
            
         }
+
+    
+
+
+
+        public WishlistItemCookie AddToCookieWishlist(HttpRequestBase request, HttpResponseBase response, BookViewModel bookViewModel)
+        {
+            var wishlistCookie = request.Cookies["Wishlist"];
+            List<WishlistItemCookie> wishlistItemCookieList;
+            if (wishlistCookie == null)
+            {
+                wishlistItemCookieList = new List<WishlistItemCookie>();
+            }
+            else
+            {
+                var wishlistJson = HttpUtility.UrlDecode(wishlistCookie.Value);
+                wishlistItemCookieList = JsonConvert.DeserializeObject<List<WishlistItemCookie>>(wishlistJson);
+            }
+
+            var bookInCookie = GetBookIfExistInCookieWishlist(bookViewModel, wishlistItemCookieList);
+            if (bookInCookie != null) return null;
+
+            string uniqueString = $"{bookViewModel.Origin}{bookViewModel.Title}{bookViewModel.BuyUrl}";
+            var hashedId = ComputeFNVHash(uniqueString);
+
+            WishlistItemCookie wishlistCookieItem = new WishlistItemCookie
+            {
+                HashedId = hashedId,
+                DateAdded = DateTime.Now,
+                Origin = bookViewModel.Origin,
+                Title = bookViewModel.Title,
+                ImageUrl = bookViewModel.ImageUrl,
+                Price = bookViewModel.Price,
+                BuyUrl = bookViewModel.BuyUrl,
+                OriginImageUrl = bookViewModel.OriginImageUrl,
+            };
+            wishlistItemCookieList.Add(wishlistCookieItem);
+            SaveWishlistToCookie(wishlistItemCookieList, response);
+            return wishlistCookieItem;
+            
+        }
+
+        public WishlistItemCookie RemoveFromCookieWishlist(HttpRequestBase request, HttpResponseBase response, BookViewModel bookViewModel)
+        {
+            var wishlistCookie = request.Cookies["Wishlist"];
+            List<WishlistItemCookie> wishlistItemCookieList;
+            if (wishlistCookie == null)
+            {
+                wishlistItemCookieList = new List<WishlistItemCookie>();
+            }
+            else
+            {
+                var wishlistJson = HttpUtility.UrlDecode(wishlistCookie.Value);
+                wishlistItemCookieList = JsonConvert.DeserializeObject<List<WishlistItemCookie>>(wishlistJson);
+            }
+            var bookInCookie = GetBookIfExistInCookieWishlist(bookViewModel, wishlistItemCookieList);
+            if (bookInCookie == null) return null;
+          
+            wishlistItemCookieList.Remove(bookInCookie);
+            SaveWishlistToCookie(wishlistItemCookieList, response);
+            return bookInCookie;
+        }
+
+
+        public void SaveWishlistToCookie(List<WishlistItemCookie> wishlist, HttpResponseBase response)
+        {
+            var wishlistJson = JsonConvert.SerializeObject(wishlist);
+            var cookie = new HttpCookie("Wishlist")
+            {
+                Value = HttpUtility.UrlEncode(wishlistJson),
+                Expires = DateTime.Now.AddDays(7) // Adjust the expiration as needed
+            };
+            response.Cookies.Add(cookie);
+        }
+
+
+
+        private WishlistItemCookie GetBookIfExistInCookieWishlist(BookViewModel bookViewModel, List<WishlistItemCookie> bookViewModelList)
+        {
+            string uniqueString = $"{bookViewModel.Origin}{bookViewModel.Title}{bookViewModel.BuyUrl}";
+            var hashedId = ComputeFNVHash(uniqueString);
+            var wishlistItem = bookViewModelList.Where(i => i.HashedId == hashedId).FirstOrDefault();
+
+            if (wishlistItem == null) return null;
+            return wishlistItem;
+
+        }
+
+
+
+
 
         private string ComputeFNVHash(string input)
         {
@@ -193,5 +304,10 @@ namespace BookCompare.Services
 
             return hash.ToString("X8"); // Convert to hexadecimal representation
         }
+
+
+
+
+
     }
 }

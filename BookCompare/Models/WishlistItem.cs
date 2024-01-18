@@ -4,10 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
+using BookCompare.ViewModels;
 
 namespace BookCompare.Models
 {
-    public class WishlistItem
+    public class WishlistItem : IWishlistViewModel
     {
         [Key, Column(Order = 0)]
         public string HashedId { get; set; } // Composite primary key with UserId 

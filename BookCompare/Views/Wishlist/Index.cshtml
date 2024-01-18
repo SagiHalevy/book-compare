@@ -1,10 +1,13 @@
-﻿@model IEnumerable<BookCompare.Models.WishlistItem>
+﻿@model IEnumerable<BookCompare.ViewModels.IWishlistViewModel>
 @{
     ViewBag.Title = "Index";
 }
 
 <h2>Wishlist</h2>
-
+@if (Model.Count() <= 0)
+{
+    <div>אין ספרים שמורים.</div>
+}
 
 <div class="container mt-5">
     @foreach (var book in Model)
@@ -39,7 +42,7 @@
                             }
                         </div>
                         <div class="col">
-                            <button class="btn btn-success add-to-wishlist" data-book-info='@Html.Raw(Json.Encode(book))'>Add to Wishlist</button>
+                            <button class="btn btn-success remove-from-wishlist" data-book-info='@Json.Encode(book)'>Remove From Wishlist</button>
                         </div>
                     </div>
                 </div>
@@ -88,3 +91,29 @@
         }
 </style>
 
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            $(".remove-from-wishlist").click(function () {
+                var button = $(this); 
+                var bookData = button.data("book-info");
+                $.ajax({
+                    type: "POST",
+                    url: "/Book/RemoveFromWishlist",
+                    contentType: "application/json",
+                    data: JSON.stringify(bookData),
+                    traditional: true,
+                    success: function () {
+                        button.closest('.card').remove();
+                    },
+                    error: function () {
+                        alert("Error removing from wishlist.");
+                    }
+                })
+            })
+        })
+    </script>
+    
+}

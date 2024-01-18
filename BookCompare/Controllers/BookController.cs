@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Xml.Linq;
+using BookCompare.CookiesModel;
 using BookCompare.DataAccess;
 using BookCompare.Models;
 using BookCompare.ScrapersNew;
@@ -41,8 +42,8 @@ namespace BookCompare.Controllers
         // Get: Book
         public async Task<ActionResult> Search(string bookName)
         {
-            var userId = User.Identity.GetUserId();
-            var sortedBookViewModels = await booksService.GetAllBooks(bookName,userId);
+            var userId = User.Identity.GetUserId(); //null if user is off
+            var sortedBookViewModels = await booksService.GetAllBooks(bookName,userId,Request);
             ViewBag.SearchInput = bookName;
             return View("Book", sortedBookViewModels);
         }
@@ -56,39 +57,52 @@ namespace BookCompare.Controllers
         [HttpPost]
         public JsonResult AddToWishlist(BookViewModel bookViewModel)
         {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Json(new { success = false, message = "User is not authenticated." });
-            }
-
             if (!ModelState.IsValid) return Json(new { success = false });
-
-            var userId = User.Identity.GetUserId();
-            WishlistItem wishlistItem = booksService.AddToWishlist(userId, bookViewModel);
-            if (wishlistItem == null)
+            if (User.Identity.IsAuthenticated)
             {
-                return Json(new { success = false });
+                var userId = User.Identity.GetUserId();
+                WishlistItem wishlistItem = booksService.AddToWishlist(userId, bookViewModel);
+                if (wishlistItem == null)
+                {
+                    return Json(new { success = false });
+                }
+            }
+            else
+            {
+                // User is not logged in, add the item to the cookie-based wishlist
+                WishlistItemCookie wishlistCookieItem = booksService.AddToCookieWishlist(Request, Response, bookViewModel);
+                if (wishlistCookieItem == null)
+                {
+                    return Json(new { success = false });
+                }
             }
             return Json(new { success = true });
-
         }
 
         [HttpPost]
         public JsonResult RemoveFromWishlist(BookViewModel bookViewModel)
         {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Json(new { success = false, message = "User is not authenticated." });
-            }
-
             if (!ModelState.IsValid) return Json(new { success = false });
 
-            var userId = User.Identity.GetUserId();
-            WishlistItem wishlistItem = booksService.RemoveFromWishlist(userId, bookViewModel);
-            if (wishlistItem == null)
+            if (User.Identity.IsAuthenticated)
             {
-                return Json(new { success = false });
+                var userId = User.Identity.GetUserId();
+                WishlistItem wishlistItem = booksService.RemoveFromWishlist(userId, bookViewModel);
+                if (wishlistItem == null)
+                {
+                    return Json(new { success = false });
+                }
             }
+            else
+            {
+                // User is not logged in, remove the item to the cookie-based wishlist
+                WishlistItemCookie wishlistCookieItem = booksService.RemoveFromCookieWishlist(Request, Response, bookViewModel);
+                if (wishlistCookieItem == null)
+                {
+                    return Json(new { success = false });
+                }
+            }
+           
             return Json(new { success = true });
 
         }
