@@ -6,6 +6,7 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Google;
 using Owin;
 using BookCompare.Models;
+using System.Configuration;
 
 namespace BookCompare
 {
@@ -54,15 +55,16 @@ namespace BookCompare
             //   consumerKey: "",
             //   consumerSecret: "");
 
-            //app.UseFacebookAuthentication(
-            //   appId: "",
-            //   appSecret: "");
+            app.UseFacebookAuthentication(
+               appId: "346074104928040",
+               appSecret: ConfigurationManager.AppSettings["FacebookAppSecret"]
+               );
 
-            //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
-            //{
-            //    ClientId = "",
-            //    ClientSecret = ""
-            //});
+            app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
+            {
+                ClientId = "781665202991-ba786j0b7d7sl0fo8u45q4pugv0e9fao.apps.googleusercontent.com",
+                ClientSecret = ConfigurationManager.AppSettings["GoogleClientSecret"]
+            });
         }
     }
 }

@@ -13,3 +13,4 @@ packages/
 *.log
 
 .vs/
+Web.config

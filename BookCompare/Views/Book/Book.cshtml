@@ -49,7 +49,7 @@ else
                             }
                         </div>
                         <div class="col">
-                            <button class="btn btn-success add-to-wishlist" 
+                            <button class="btn btn-success add-to-wishlist"
                                     data-book-info='@Json.Encode(book)'
                                     data-is-in-wishlist='@book.IsInWishlist.ToString().ToLower()'>
                                 @(book.IsInWishlist ? "Remove From Wishlist" : "Add to Wishlist")
@@ -108,7 +108,7 @@ else
     <script>
         $(document).ready(function () {
             $(".add-to-wishlist").click(function () {
-                var button = $(this); 
+                var button = $(this);
                 var isCurrentlyInWishlist = button.data("is-in-wishlist");
                 var ajaxUrl = isCurrentlyInWishlist ? "/Book/RemoveFromWishlist" : "/Book/AddToWishlist";
                 var bookData = button.data("book-info");

@@ -383,7 +383,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>2474</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44373/</IISUrl>
+          <IISUrl>https://localhost:44373</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
