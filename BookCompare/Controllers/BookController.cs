@@ -59,6 +59,7 @@ namespace BookCompare.Controllers
         public JsonResult AddToWishlist(BookViewModel bookViewModel)
         {
             if (!ModelState.IsValid) return Json(new { success = false });
+
             if (User.Identity.IsAuthenticated)
             {
                 var userId = User.Identity.GetUserId();
@@ -68,9 +69,8 @@ namespace BookCompare.Controllers
                     return Json(new { success = false });
                 }
             }
-            else
+            else // User is not logged in, add the item to the cookie-based wishlist
             {
-                // User is not logged in, add the item to the cookie-based wishlist
                 WishlistItemCookie wishlistCookieItem = booksService.AddToCookieWishlist(Request, Response, bookViewModel);
                 if (wishlistCookieItem == null)
                 {

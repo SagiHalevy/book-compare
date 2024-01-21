@@ -8,12 +8,16 @@
 {
     <div>אין ספרים שמורים.</div>
 }
+<input type="text" id="searchInput" placeholder="חפש ספר">
 
 <div class="container mt-5">
     @foreach (var book in Model)
     {
-        <div class="card">
+        <div class="card bookItem">
             <div class="row no-gutters align-items-center flex-column flex-md-row">
+                <div class="col-auto text-center">
+                    <span>תאריך הוספה:<br />@book.DateAdded</span>
+                </div>
                 <div class="col d-flex align-items-center justify-content-center mt-2 mt-md-0">
                     <img src="@Url.Content(book.ImageUrl)" alt="Book Image" class="book-image">
                 </div>
@@ -97,7 +101,7 @@
     <script>
         $(document).ready(function () {
             $(".remove-from-wishlist").click(function () {
-                var button = $(this); 
+                var button = $(this);
                 var bookData = button.data("book-info");
                 $.ajax({
                     type: "POST",
@@ -113,7 +117,15 @@
                     }
                 })
             })
+
+
+
+            $('#searchInput').on('input', function () {
+                var searchTerm = $(this).val().toLowerCase(); 
+                $('.bookItem').hide();
+                $('.card-title:contains("' + searchTerm + '")').closest('.bookItem').show();
+            });
         })
     </script>
-    
+
 }

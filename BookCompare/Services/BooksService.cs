@@ -202,6 +202,9 @@ namespace BookCompare.Services
 
 
 
+
+
+
         public WishlistItemCookie AddToCookieWishlist(HttpRequestBase request, HttpResponseBase response, BookViewModel bookViewModel)
         {
             var wishlistCookie = request.Cookies["Wishlist"];
@@ -271,7 +274,6 @@ namespace BookCompare.Services
             };
             response.Cookies.Add(cookie);
         }
-
 
 
         private WishlistItemCookie GetBookIfExistInCookieWishlist(BookViewModel bookViewModel, List<WishlistItemCookie> bookViewModelList)
