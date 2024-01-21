@@ -1,15 +1,18 @@
-# Web-Based Mobile-Controlled Games [WIP]
+# Books Price Comparison Site
 
-This project aims to create a web gaming platform that allows users to experience gaming sessions displayed on their computers while controlling the game using their mobile device orientation. The project utilizes Angular for the client-side development, and real-time communication is achieved through ASP.NET Core and SignalR.
+This project is a full-stack web application developed using ASP.NET MVC, C#, SQL Server, and Redis. The primary goal is to compare book prices across multiple stores. The application also incorporates features such as efficient caching with Redis, SQL Server for data storage, cookie storage for unauthenticated user preferences, and OAuth2 authentication (Google/Facebook).
 
 ## Features
 
-- Web-based gaming platform.
-- Real-time communication using SignalR.
-- Mobile device orientation control.
+- Compare book prices across multiple stores.
+- Efficient caching using Redis.
+- SQL Server as the primary database.
+- Cookie storage for unauthenticated user preferences.
+- OAuth2 authentication with Google and Facebook.
 
 ## Technologies Used
 
-- **Angular:** Front-end development.
-- **ASP.NET Core:** Back-end development.
-- **SignalR:** Real-time communication.
+- **ASP.NET MVC:** Full-stack web development.
+- **C#:** Programming language.
+- **SQL Server:** Database management.
+- **Redis:** Caching solution.
