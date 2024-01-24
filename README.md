@@ -16,3 +16,6 @@ This project is a full-stack web application developed using ASP.NET MVC, C#, SQ
 - **C#:** Programming language.
 - **SQL Server:** Database management.
 - **Redis:** Caching solution.
+
+  
+![image](https://github.com/SagiHalevy/book-compare/assets/92096601/280660d0-108d-4b59-bbb3-cfb7806cfe85)
